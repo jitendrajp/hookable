@@ -1,5 +1,5 @@
 {
-    "name": "ortic/hookable",
+    "name": "sofa/hookable",
     "description": "Laravel Eloquent hooks system.",
     "license": "MIT",
     "support": {
