@@ -100,7 +100,7 @@ trait Hookable
      *
      * @param  string $key
      * @param  mixed  $value
-     * @return void
+     * @return mixed
      */
     public function setAttribute($key, $value)
     {
@@ -111,7 +111,9 @@ trait Hookable
             parent::setAttribute($key, $value);
         };
 
-        return $this->pipe($hooks, $payload, $params, $destination);
+        $this->pipe($hooks, $payload, $params, $destination);
+
+        return $this;
     }
 
     /**
@@ -122,15 +124,15 @@ trait Hookable
      */
     public function save(array $options = [])
     {
-        if (!parent::save($options)) {
+        if (!($saved = parent::save($options)) && $this->isDirty()) {
             return false;
         }
 
         $hooks       = $this->boundHooks(__FUNCTION__);
         $params      = compact('options');
         $payload     = true;
-        $destination = function () {
-            return true;
+        $destination = function () use ($saved) {
+            return $saved;
         };
 
         return $this->pipe($hooks, $payload, $params, $destination);
@@ -144,7 +146,7 @@ trait Hookable
      */
     public function isDirty($attributes = null)
     {
-        if (! is_array($attributes) && !is_null($attributes)) {
+        if (! is_array($attributes)) {
             $attributes = func_get_args();
         }
 
@@ -177,6 +179,8 @@ trait Hookable
 
     /**
      * Register hook for replicate.
+     *
+     * @param array|null $except
      *
      * @return mixed
      */
